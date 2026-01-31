@@ -2,6 +2,8 @@
 
 ## Introduction
 
+**Note: This is an experimental project to evaluate the viability of integrating Kiro CLI with GitHub Actions.**
+
 The Kiro Workers is a collection of four discrete GitHub Actions that integrate Kiro's AI capabilities into GitHub workflows. The suite consists of:
 1. **kiro-cli-setup**: Sets up the Kiro CLI in GitHub Actions environments
 2. **kiro-pr-review**: Performs AI-powered code reviews on pull requests
@@ -9,6 +11,8 @@ The Kiro Workers is a collection of four discrete GitHub Actions that integrate 
 4. **kiro-project-sync**: Synchronizes Kiro specs with GitHub Projects and issues
 
 Each action is independently configurable with isolated permissions and supports flexible prompting through default prompts, repository-level configuration files, and per-workflow prompt overrides.
+
+This experimental project aims to determine whether GitHub Actions can effectively host Kiro CLI operations, assess performance characteristics, evaluate user experience, and identify any technical limitations or challenges in the integration.
 
 ## Glossary
 
@@ -295,3 +299,30 @@ Each action is independently configurable with isolated permissions and supports
 5. THE pre-commit configuration SHALL include hooks for trailing whitespace, end-of-file fixes, and YAML validation
 6. WHERE language-specific files exist, THE pre-commit configuration SHALL include appropriate linters and formatters
 7. THE project documentation SHALL include instructions for setting up pre-commit hooks for contributors
+
+### Requirement 14: Conventional Commits
+
+**User Story:** As a contributor, I want the project to use Conventional Commits, so that commit history is standardized and semantic versioning can be automated.
+
+#### Acceptance Criteria
+
+1. THE project SHALL follow the Conventional Commits specification for all commit messages
+2. THE project SHALL include tooling to validate commit messages against the Conventional Commits format
+3. THE pre-commit configuration SHALL include a hook to validate commit message format
+4. THE project documentation SHALL include guidelines for writing Conventional Commits
+5. THE Conventional Commits format SHALL support semantic versioning automation
+6. WHEN a commit message does not follow the specification, THE validation SHALL fail with a clear error message
+
+### Requirement 15: No Third-Party Dependencies in Actions
+
+**User Story:** As a security-conscious maintainer, I want the GitHub Actions to avoid third-party dependencies, so that the attack surface is minimized and supply chain risks are reduced.
+
+#### Acceptance Criteria
+
+1. THE GitHub Actions SHALL NOT include third-party npm packages beyond the official GitHub Actions toolkit
+2. THE actions SHALL use only @actions/* packages (core, github, tool-cache, exec, http-client) for GitHub Actions functionality
+3. THE actions SHALL use only Node.js built-in modules for all other functionality
+4. WHERE external functionality is needed, THE actions SHALL implement it directly rather than importing third-party libraries
+5. THE project SHALL document the rationale for this constraint in the README
+6. WHEN building the actions, THE bundled output SHALL be audited to ensure no third-party dependencies are included
+7. THE actions SHALL NOT use external HTTP APIs beyond GitHub's official APIs and the Kiro CLI download endpoint
