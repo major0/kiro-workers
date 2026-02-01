@@ -20,7 +20,7 @@ This implementation plan breaks down the kiro-workers project into discrete, inc
     - Use Node.js https and fs modules only
     - _Requirements: 1.1, 9.4_
 
-  - [ ] 2.2 Write property test for download utility
+  - [x] 2.2 Write property test for download utility
     - **Property 35: Retry with Exponential Backoff**
     - **Validates: Requirements 9.4**
 
