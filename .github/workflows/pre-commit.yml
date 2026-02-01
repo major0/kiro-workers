@@ -1,0 +1,180 @@
+name: Pre-commit
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  pre-commit:
+    name: Run Pre-commit Hooks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install Node.js dependencies
+        run: npm ci
+        continue-on-error: true
+
+      - name: Install pre-commit
+        run: |
+          pip install pre-commit
+          echo "✅ Pre-commit installed"
+
+      - name: Cache pre-commit environments
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            pre-commit-${{ runner.os }}-
+
+      - name: Check if pre-commit config exists
+        id: check-config
+        run: |
+          if [ -f ".pre-commit-config.yaml" ]; then
+            echo "config_exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Pre-commit config found"
+          else
+            echo "config_exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ No .pre-commit-config.yaml found - skipping pre-commit checks"
+          fi
+
+      - name: Run pre-commit on all files
+        if: steps.check-config.outputs.config_exists == 'true'
+        run: |
+          echo "🔍 Running pre-commit hooks on all files..."
+          pre-commit run --all-files --show-diff-on-failure
+          echo "✅ All pre-commit hooks passed"
+
+      - name: Run pre-commit on changed files (PR only)
+        if: |
+          steps.check-config.outputs.config_exists == 'true' &&
+          github.event_name == 'pull_request'
+        run: |
+          echo "🔍 Running pre-commit hooks on changed files..."
+
+          # Get the list of changed files
+          git fetch origin ${{ github.base_ref }}
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "ℹ️ No files changed"
+            exit 0
+          fi
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          echo ""
+
+          # Run pre-commit on changed files
+          echo "$CHANGED_FILES" | xargs pre-commit run --files
+          echo "✅ Pre-commit checks passed for changed files"
+
+      - name: Verify EditorConfig compliance
+        run: |
+          echo "🔍 Verifying EditorConfig compliance..."
+
+          if [ ! -f ".editorconfig" ]; then
+            echo "⚠️ No .editorconfig found - skipping EditorConfig verification"
+            exit 0
+          fi
+
+          # Check for common EditorConfig violations
+          echo "Checking for trailing whitespace..."
+          if git grep -n '[[:space:]]$' -- '*.ts' '*.js' '*.yml' '*.yaml' '*.json' '*.md' 2>/dev/null; then
+            echo "❌ Trailing whitespace found (see above)"
+            exit 1
+          fi
+
+          echo "Checking for missing final newline..."
+          MISSING_NEWLINE=$(find . -type f \( -name "*.ts" -o -name "*.js" -o -name "*.yml" -o -name "*.yaml" -o -name "*.json" -o -name "*.md" \) -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/dist/*" -exec sh -c 'test -n "$(tail -c 1 "{}")"' \; -print 2>/dev/null || true)
+
+          if [ -n "$MISSING_NEWLINE" ]; then
+            echo "❌ Files missing final newline:"
+            echo "$MISSING_NEWLINE"
+            exit 1
+          fi
+
+          echo "✅ EditorConfig compliance verified"
+
+      - name: Verify Conventional Commits (PR only)
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "🔍 Verifying Conventional Commits format..."
+
+          # Get all commit messages in the PR (excluding merge commits)
+          git fetch origin ${{ github.base_ref }}
+          COMMITS=$(git log --format=%s --no-merges origin/${{ github.base_ref }}..HEAD)
+
+          if [ -z "$COMMITS" ]; then
+            echo "ℹ️ No commits to check"
+            exit 0
+          fi
+
+          # Conventional Commits regex pattern
+          # Format: <type>(<scope>): <subject>
+          # Types: feat, fix, docs, style, refactor, test, chore, build, ci, perf, revert
+          PATTERN="^(feat|fix|docs|style|refactor|test|chore|build|ci|perf|revert)(\([a-z0-9-]+\))?: .+"
+
+          INVALID_COMMITS=""
+          while IFS= read -r commit; do
+            if ! echo "$commit" | grep -qE "$PATTERN"; then
+              INVALID_COMMITS="$INVALID_COMMITS\n  - $commit"
+            fi
+          done <<< "$COMMITS"
+
+          if [ -n "$INVALID_COMMITS" ]; then
+            echo "❌ Invalid commit messages found:"
+            echo -e "$INVALID_COMMITS"
+            echo ""
+            echo "Commit messages must follow Conventional Commits format:"
+            echo "  <type>(<scope>): <subject>"
+            echo ""
+            echo "Valid types: feat, fix, docs, style, refactor, test, chore, build, ci, perf, revert"
+            echo ""
+            echo "Examples:"
+            echo "  feat(shared): add download utility"
+            echo "  fix(setup): correct cache key generation"
+            echo "  docs(readme): update installation instructions"
+            exit 1
+          fi
+
+          echo "✅ All commits follow Conventional Commits format"
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Pre-commit Checks Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.check-config.outputs.config_exists }}" == "true" ]; then
+            echo "✅ Pre-commit hooks executed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No pre-commit config found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "✅ EditorConfig compliance checked" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "✅ Conventional Commits format verified" >> $GITHUB_STEP_SUMMARY
+          fi

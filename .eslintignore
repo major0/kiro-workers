@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.bundle.js
+*.min.js
+
+# Coverage
+coverage/
+
+# Configuration files
+*.config.js
+*.config.ts
+
+# Type definitions
+*.d.ts
+
+# Logs
+*.log
