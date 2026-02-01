@@ -4,14 +4,19 @@
   "description": "GitHub Actions for Kiro CLI integration",
   "private": true,
   "scripts": {
-    "lint": "echo 'No TypeScript files to lint yet'",
-    "type-check": "echo 'No TypeScript files to check yet'",
-    "test": "echo 'No tests to run yet'",
-    "build": "echo 'No code to build yet'",
-    "build:kiro-cli-setup": "echo 'kiro-cli-setup not implemented yet'",
-    "build:kiro-pr-review": "echo 'kiro-pr-review not implemented yet'",
-    "build:kiro-issue-review": "echo 'kiro-issue-review not implemented yet'",
-    "build:kiro-project-sync": "echo 'kiro-project-sync not implemented yet'"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:properties": "jest --testMatch='**/*.properties.test.ts'",
+    "build": "npm run build:kiro-cli-setup && npm run build:kiro-pr-review && npm run build:kiro-issue-review && npm run build:kiro-project-sync",
+    "build:kiro-cli-setup": "ncc build actions/kiro-cli-setup/src/main.ts -o actions/kiro-cli-setup/dist --source-map --license licenses.txt",
+    "build:kiro-pr-review": "ncc build actions/kiro-pr-review/src/main.ts -o actions/kiro-pr-review/dist --source-map --license licenses.txt",
+    "build:kiro-issue-review": "ncc build actions/kiro-issue-review/src/main.ts -o actions/kiro-issue-review/dist --source-map --license licenses.txt",
+    "build:kiro-project-sync": "ncc build actions/kiro-project-sync/src/main.ts -o actions/kiro-project-sync/dist --source-map --license licenses.txt",
+    "clean": "rm -rf actions/*/dist shared/**/*.js shared/**/*.d.ts"
   },
   "repository": {
     "type": "git",
@@ -27,5 +32,27 @@
   "bugs": {
     "url": "https://github.com/major0/kiro-workers/issues"
   },
-  "homepage": "https://github.com/major0/kiro-workers#readme"
+  "homepage": "https://github.com/major0/kiro-workers#readme",
+  "dependencies": {
+    "@actions/core": "^3.0.0",
+    "@actions/exec": "^1.1.1",
+    "@actions/github": "^9.0.0",
+    "@actions/http-client": "^4.0.0",
+    "@actions/tool-cache": "^4.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.6",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "@vercel/ncc": "^0.38.1",
+    "eslint": "^9.39.2",
+    "fast-check": "^3.15.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.1.1",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.54.0"
+  }
 }

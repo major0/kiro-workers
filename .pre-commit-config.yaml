@@ -83,22 +83,20 @@ repos:
           - --ignore-unknown
           - --config-precedence=prefer-file
 
-  # ESLint for TypeScript/JavaScript linting
-  - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v8.56.0
+  # ESLint for TypeScript/JavaScript linting (local)
+  - repo: local
     hooks:
       - id: eslint
         name: Lint with ESLint
         description: Lints TypeScript and JavaScript files
+        entry: npx eslint
+        language: system
         types_or: [javascript, jsx, ts, tsx]
         args:
           - --fix
           - --max-warnings=0
-        additional_dependencies:
-          - eslint@8.56.0
-          - "@typescript-eslint/eslint-plugin@6.21.0"
-          - "@typescript-eslint/parser@6.21.0"
-          - typescript@5.3.3
+          - --no-warn-ignored
+        pass_filenames: true
 
   # Markdownlint for Markdown files
   - repo: https://github.com/igorshubovych/markdownlint-cli
