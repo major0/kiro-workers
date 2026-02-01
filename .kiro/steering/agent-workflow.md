@@ -1,5 +1,61 @@
 # Agent Workflow and Branching
 
+## CRITICAL: Topic Branch Creation Rules
+
+**MANDATORY WORKFLOW FOR ALL NEW WORK:**
+
+Before starting ANY new work, the primary agent MUST execute this exact sequence:
+
+```bash
+# Step 1: Switch to main branch
+git checkout main
+
+# Step 2: Update main from remote (REQUIRED - never skip this!)
+git pull origin main
+
+# Step 3: ONLY NOW create new topic branch from updated main
+git checkout -b <type>/<description>
+```
+
+**ABSOLUTE ENFORCEMENT RULES:**
+
+1. ✅ **ALWAYS update main first**: `git checkout main && git pull origin main`
+2. ✅ **ALWAYS create NEW topic branches from UPDATED main**: Never reuse old branches for new work
+3. ✅ **ALWAYS verify you're on the correct branch before committing**: `git branch --show-current`
+4. ❌ **NEVER work directly on main or develop**
+5. ❌ **NEVER create topic branches from outdated main** - ALWAYS pull first
+6. ❌ **NEVER create topic branches from other topic branches**
+7. ❌ **NEVER skip the `git pull origin main` step** - This is NOT optional
+8. ❌ **NEVER reuse an old topic branch for new work** - Always create a fresh branch
+9. ❌ **NEVER assume main is up-to-date** - Always pull explicitly
+
+**What constitutes "new work" requiring a NEW topic branch:**
+- Starting a new task from the task list
+- Implementing a new feature
+- Creating new files or functionality
+- Any work that will result in a new PR
+- **ANY work request from the user after a previous PR was created**
+
+**What does NOT require a new branch:**
+- Continuing work on the CURRENT topic branch (same session)
+- Fixing issues on the current topic branch before it's merged
+- Amending commits on the current topic branch
+
+**Pre-Work Checklist (MANDATORY):**
+
+Before starting new work, the agent MUST:
+1. Check current branch: `git branch --show-current`
+2. If NOT on main, switch: `git checkout main`
+3. Pull latest changes: `git pull origin main` (NEVER skip this!)
+4. Create fresh topic branch: `git checkout -b <type>/<description>`
+5. Verify new branch: `git branch --show-current`
+
+**Failure to follow this workflow will result in:**
+- Merge conflicts
+- Integration issues
+- Out-of-sync code
+- Rejected pull requests
+
 ## Topic Branch Requirements
 
 **CRITICAL**: All task work must be done on appropriately named topic branches. Never work directly on `main` or `develop`.
@@ -37,10 +93,15 @@ When working on tasks from `.kiro/specs/*/tasks.md`:
 
 ### Starting Work on a Task
 
-1. **Check current branch**: Ensure you're on `main` or `develop`
-2. **Create topic branch**: `git checkout -b feat/2.1-download-utility`
-3. **Perform all work on this branch**
-4. **Commit with Conventional Commits**: `feat(shared): 2.1 Create download utility`
+**CRITICAL**: Before creating any topic branch, you MUST ensure main is up to date:
+
+1. **Switch to main**: `git checkout main`
+2. **Update main**: `git pull origin main`
+3. **Create topic branch from updated main**: `git checkout -b <type>/<task-id>-<description>`
+4. **Perform all work on this branch**
+5. **Commit with Conventional Commits**: `<type>(scope): <task-id> <task-title>`
+
+**NEVER create a topic branch without first updating main. This ensures your branch starts from the latest code and avoids merge conflicts.**
 
 ### Sub-Agent Coordination
 
@@ -77,10 +138,10 @@ git commit -m "test(shared): 2.2 Add tests for download utility"
 ```bash
 # Ensure you're up to date
 git checkout main
-git pull origin main
+git pull
 
 # Create topic branch
-git checkout -b feat/<task-id>-<description>
+git checkout -b feat/<task-id>-<description> origin/main
 ```
 
 ### During Work
