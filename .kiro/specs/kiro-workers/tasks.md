@@ -14,7 +14,7 @@ This implementation plan breaks down the kiro-workers project into discrete, inc
   - _Requirements: 15.1, 15.2, 15.3_
 
 - [ ] 2. Implement shared utility modules
-  - [ ] 2.1 Create download utility (`shared/utils/download.ts`)
+  - [x] 2.1 Create download utility (`shared/utils/download.ts`)
     - Implement `downloadFile()` with retry logic using @actions/http-client
     - Implement `getPlatform()` for OS/arch detection
     - Use Node.js https and fs modules only
