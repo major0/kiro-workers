@@ -20,6 +20,9 @@ module.exports = {
     },
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
   transform: {
     '^.+\\.tsx?$': [
       'ts-jest',
@@ -28,6 +31,7 @@ module.exports = {
           esModuleInterop: true,
           allowSyntheticDefaultImports: true,
         },
+        useESM: false,
       },
     ],
   },
