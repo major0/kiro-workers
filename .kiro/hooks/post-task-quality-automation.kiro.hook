@@ -8,7 +8,7 @@
   },
   "then": {
     "type": "askAgent",
-    "prompt": "The main task is complete. Now spin up sub-agents to handle the following in parallel:\n\n1. Documentation: Review all modified files and update relevant documentation (README, inline comments, API docs)\n2. Testing: Develop comprehensive unit tests with 90% or greater code coverage for all new/modified code. Use an agent suitable for complex reasoning.\n3. Examples: Update or create examples that demonstrate the new functionality\n\nUse the general-task-execution sub-agent for each of these tasks to work on them efficiently."
+    "prompt": "Review the work that was just completed.\n\nIf the work involved implementing code (not just documentation, configuration, or tooling), then spin up sub-agents to handle the following in parallel:\n\n1. Documentation: Review all modified files and update relevant documentation (README, inline comments, API docs)\n2. Testing: Develop comprehensive unit tests with 90% or greater code coverage for all new/modified code. Use an agent suitable for complex reasoning.\n3. Examples: Update or create examples that demonstrate the new functionality\n4. Lint: Review modified code with a language appropriate linter.\n5. Security: Analyse implemented code and validate that it is secure.\n\nUse the general-task-execution sub-agent for each of these tasks to work on them efficiently.\n\nIf the work was only documentation, configuration files, or tooling setup (no application code), skip the sub-agents and simply acknowledge the work is complete."
   },
   "workspaceFolderName": "kiro-workers",
   "shortName": "post-task-quality-automation"

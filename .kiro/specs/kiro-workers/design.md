@@ -554,7 +554,7 @@ async function verifyChecksum(filePath: string, expectedChecksum: string): Promi
 // Wrapper for common GitHub API operations
 class GitHubAPIClient {
   constructor(octokit: Octokit);
-  
+
   async getPullRequest(prNumber: number): Promise<PullRequest>;
   async getIssue(issueNumber: number): Promise<Issue>;
   async listIssues(state?: 'open' | 'closed' | 'all'): Promise<Issue[]>;
@@ -1227,8 +1227,8 @@ const taskMarkdown = fc.array(
     status: fc.constantFrom('not_started', 'in_progress', 'completed'),
     optional: fc.boolean()
   })
-).map(tasks => 
-  tasks.map(t => 
+).map(tasks =>
+  tasks.map(t =>
     `- [${t.status === 'completed' ? 'x' : ' '}]${t.optional ? '*' : ''} ${t.id} ${t.title}`
   ).join('\n')
 );

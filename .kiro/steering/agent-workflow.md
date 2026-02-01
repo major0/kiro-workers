@@ -232,7 +232,7 @@ git rebase -i main  # Delete lines or mark as 'drop'
    ```bash
    # View PR status
    gh pr view <pr-number>
-   
+
    # Watch PR checks in real-time
    gh pr checks <pr-number> --watch
    ```
@@ -249,10 +249,10 @@ git rebase -i main  # Delete lines or mark as 'drop'
    ```bash
    # List all checks and their status
    gh pr checks <pr-number>
-   
+
    # View specific workflow run
    gh run view <run-id>
-   
+
    # View workflow logs
    gh run view <run-id> --log
    ```
@@ -270,18 +270,18 @@ When CI/CD checks fail:
    ```bash
    # Reproduce the failure locally
    npm test  # or specific test command
-   
+
    # Fix the issue
    # ... make changes ...
-   
+
    # Verify fix locally
    npm test
    pre-commit run --all-files
-   
+
    # Commit the fix
    git add <files>
    git commit --amend --no-edit  # Or new commit if appropriate
-   
+
    # Force push if amended (use with caution)
    git push origin <branch-name> --force-with-lease
    ```
@@ -301,13 +301,13 @@ When CI/CD checks fail:
 
 - **Pre-commit failures**: Formatting, linting, or hook issues
   - Fix: Run `pre-commit run --all-files` locally and commit fixes
-  
+
 - **Test failures**: Unit tests or property tests failing
   - Fix: Debug tests locally, fix code or tests, verify, commit
-  
+
 - **Build failures**: TypeScript compilation or bundling errors
   - Fix: Run `npm run build` locally, fix errors, commit
-  
+
 - **Coverage failures**: Code coverage below threshold
   - Fix: Add missing tests, verify coverage locally, commit
 
