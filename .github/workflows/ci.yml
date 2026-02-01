@@ -102,15 +102,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check if action is implemented
+        id: check-impl
+        run: |
+          if [ -f "actions/${{ matrix.action }}/src/main.ts" ]; then
+            echo "implemented=true" >> $GITHUB_OUTPUT
+            echo "✅ Action ${{ matrix.action }} is implemented"
+          else
+            echo "implemented=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Action ${{ matrix.action }} not implemented yet - skipping build"
+          fi
+
       - name: Build TypeScript
+        if: steps.check-impl.outputs.implemented == 'true'
         run: npm run build:${{ matrix.action }}
 
       - name: Verify dist directory exists
+        if: steps.check-impl.outputs.implemented == 'true'
         run: |
-          if [ ! -d "actions/${{ matrix.action }}" ]; then
-            echo "⚠️ Action ${{ matrix.action }} not implemented yet - skipping"
-            exit 0
-          fi
           if [ ! -d "actions/${{ matrix.action }}/dist" ]; then
             echo "❌ Error: dist directory not found for ${{ matrix.action }}"
             exit 1
@@ -118,7 +127,7 @@ jobs:
           echo "✅ Build successful for ${{ matrix.action }}"
 
       - name: Upload build artifacts
-        if: hashFiles('actions/${{ matrix.action }}/dist/**') != ''
+        if: steps.check-impl.outputs.implemented == 'true' && hashFiles('actions/${{ matrix.action }}/dist/**') != ''
         uses: actions/upload-artifact@v4
         with:
           name: dist-${{ matrix.action }}
