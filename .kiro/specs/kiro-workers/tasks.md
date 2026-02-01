@@ -410,18 +410,18 @@ This implementation plan breaks down the kiro-workers project into discrete, inc
 
 
 - [ ] 12. Implement development tooling
-  - [ ] 12.1 Create .editorconfig file
+  - [x] 12.1 Create .editorconfig file
     - Define formatting rules for all file types
     - Specify indentation, line endings, charset, trailing whitespace
     - _Requirements: 13.1, 13.2_
 
-  - [ ] 12.2 Create .pre-commit-config.yaml file
+  - [x] 12.2 Create .pre-commit-config.yaml file
     - Configure pre-commit hooks for all file types
     - Add hooks for trailing whitespace, end-of-file fixes, YAML validation
     - Add TypeScript linting and formatting hooks
     - _Requirements: 13.3, 13.4, 13.5, 13.6_
 
-  - [ ] 12.3 Add Conventional Commits validation
+  - [x] 12.3 Add Conventional Commits validation
     - Add commit message validation hook to pre-commit config
     - Implement commit message format validator
     - _Requirements: 14.1, 14.2, 14.3_
