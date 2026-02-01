@@ -1,0 +1,58 @@
+# yamllint configuration for kiro-workers
+# See https://yamllint.readthedocs.io/en/stable/configuration.html
+
+extends: default
+
+rules:
+  # Line length - allow longer lines for readability
+  line-length:
+    max: 300
+    level: warning
+
+  # Indentation - 2 spaces
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+
+  # Comments - require space after #
+  comments:
+    min-spaces-from-content: 1
+
+  # Document start - don't require ---
+  document-start:
+    present: false
+
+  # Truthy values - allow yes/no/on/off
+  truthy:
+    allowed-values: ["true", "false", "yes", "no", "on", "off"]
+    check-keys: false
+
+  # Brackets - allow inline brackets
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+
+  # Braces - allow inline braces
+  braces:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+
+  # Empty lines
+  empty-lines:
+    max: 2
+
+  # Key duplicates - error on duplicate keys
+  key-duplicates: enable
+
+  # Trailing spaces - no trailing spaces
+  trailing-spaces: enable
+
+  # New line at end of file
+  new-line-at-end-of-file: enable
+
+ignore: |
+  node_modules/
+  dist/
+  .git/
+  coverage/

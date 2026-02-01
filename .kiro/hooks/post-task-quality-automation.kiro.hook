@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "name": "Post-Task Quality Automation",
+  "description": "When the main agent finishes working on a task, automatically spin up sub-agents to document changes, develop unit tests with 90%+ coverage, and update any relevant examples",
+  "version": "1",
+  "when": {
+    "type": "agentStop"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "The main task is complete. Now spin up sub-agents to handle the following in parallel:\n\n1. Documentation: Review all modified files and update relevant documentation (README, inline comments, API docs)\n2. Testing: Develop comprehensive unit tests with 90% or greater code coverage for all new/modified code. Use an agent suitable for complex reasoning.\n3. Examples: Update or create examples that demonstrate the new functionality\n\nUse the general-task-execution sub-agent for each of these tasks to work on them efficiently."
+  },
+  "workspaceFolderName": "kiro-workers",
+  "shortName": "post-task-quality-automation"
+}

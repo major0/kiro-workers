@@ -1,0 +1,31 @@
+{
+  "name": "kiro-workers",
+  "version": "0.0.0",
+  "description": "GitHub Actions for Kiro CLI integration",
+  "private": true,
+  "scripts": {
+    "lint": "echo 'No TypeScript files to lint yet'",
+    "type-check": "echo 'No TypeScript files to check yet'",
+    "test": "echo 'No tests to run yet'",
+    "build": "echo 'No code to build yet'",
+    "build:kiro-cli-setup": "echo 'kiro-cli-setup not implemented yet'",
+    "build:kiro-pr-review": "echo 'kiro-pr-review not implemented yet'",
+    "build:kiro-issue-review": "echo 'kiro-issue-review not implemented yet'",
+    "build:kiro-project-sync": "echo 'kiro-project-sync not implemented yet'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/major0/kiro-workers.git"
+  },
+  "keywords": [
+    "github-actions",
+    "kiro",
+    "ci-cd"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/major0/kiro-workers/issues"
+  },
+  "homepage": "https://github.com/major0/kiro-workers#readme"
+}

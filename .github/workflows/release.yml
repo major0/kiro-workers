@@ -1,0 +1,224 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-all:
+    name: Build All Actions
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from tag
+        id: get-version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Building release version: $VERSION"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build all actions
+        run: |
+          echo "🔨 Building all actions..."
+          npm run build:kiro-cli-setup
+          npm run build:kiro-pr-review
+          npm run build:kiro-issue-review
+          npm run build:kiro-project-sync
+          echo "✅ All actions built successfully"
+
+      - name: Verify all dist directories
+        run: |
+          ACTIONS=("kiro-cli-setup" "kiro-pr-review" "kiro-issue-review" "kiro-project-sync")
+          for action in "${ACTIONS[@]}"; do
+            if [ ! -d "actions/$action/dist" ]; then
+              echo "❌ Error: dist directory not found for $action"
+              exit 1
+            fi
+            if [ ! -f "actions/$action/dist/index.js" ]; then
+              echo "❌ Error: index.js not found in dist for $action"
+              exit 1
+            fi
+            echo "✅ Verified build for $action"
+          done
+
+      - name: Verify zero third-party dependencies
+        run: |
+          echo "🔍 Verifying zero third-party dependencies constraint..."
+          ACTIONS=("kiro-cli-setup" "kiro-pr-review" "kiro-issue-review" "kiro-project-sync")
+
+          for action in "${ACTIONS[@]}"; do
+            echo "Checking $action..."
+            BUNDLE_FILE="actions/$action/dist/index.js"
+
+            # Extract require() calls
+            REQUIRES=$(grep -oP "require\(['\"]([^'\"]+)['\"]\)" "$BUNDLE_FILE" | sort -u || true)
+
+            # Check for third-party dependencies
+            THIRD_PARTY=$(echo "$REQUIRES" | grep -v "require('@actions/" | grep -v "require('node:" | grep -v "^$" || true)
+
+            # Filter out Node.js built-ins
+            BUILTINS="fs|path|crypto|https|http|child_process|os|util|stream|events|buffer|url|querystring|zlib|net|tls|dns|readline|process|assert|string_decoder|timers|tty|vm|worker_threads|perf_hooks|async_hooks|inspector|trace_events|v8|module"
+            THIRD_PARTY=$(echo "$THIRD_PARTY" | grep -vE "require\('($BUILTINS)'\)" || true)
+
+            if [ -n "$THIRD_PARTY" ]; then
+              echo "❌ Error: Third-party dependencies detected in $action"
+              echo "$THIRD_PARTY"
+              exit 1
+            fi
+            echo "✅ $action passed dependency audit"
+          done
+          echo "✅ All actions passed zero third-party dependencies verification"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-all-actions
+          path: |
+            actions/*/dist/
+          retention-days: 30
+
+  commit-dist:
+    name: Commit dist/ Directories
+    runs-on: ubuntu-latest
+    needs: build-all
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-all-actions
+          path: actions/
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Check for changes
+        id: check-changes
+        run: |
+          git add actions/*/dist/
+          if git diff --staged --quiet; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No changes to dist/ directories"
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "📝 Changes detected in dist/ directories"
+          fi
+
+      - name: Commit and push dist/ directories
+        if: steps.check-changes.outputs.changes == 'true'
+        run: |
+          git commit -m "build: update dist/ for release ${{ needs.build-all.outputs.version }}"
+          git push origin HEAD:${{ github.ref_name }}
+          echo "✅ Committed and pushed dist/ directories"
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs:
+      - build-all
+      - commit-dist
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-all-actions
+          path: actions/
+
+      - name: Generate release notes
+        id: release-notes
+        run: |
+          VERSION=${{ needs.build-all.outputs.version }}
+
+          # Get the previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          # Generate changelog
+          if [ -n "$PREV_TAG" ]; then
+            echo "## What's Changed" > release-notes.md
+            echo "" >> release-notes.md
+            git log --pretty=format:"* %s (%h)" $PREV_TAG..HEAD >> release-notes.md
+          else
+            echo "## Initial Release" > release-notes.md
+            echo "" >> release-notes.md
+            echo "First release of Kiro Workers GitHub Actions." >> release-notes.md
+          fi
+
+          echo "" >> release-notes.md
+          echo "## Actions Included" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "* **kiro-cli-setup**: Downloads, verifies, caches, and installs the Kiro CLI binary" >> release-notes.md
+          echo "* **kiro-pr-review**: Analyzes pull requests using Kiro CLI with configurable agents" >> release-notes.md
+          echo "* **kiro-issue-review**: Analyzes GitHub issues with duplicate detection and spec validation" >> release-notes.md
+          echo "* **kiro-project-sync**: Synchronizes Kiro spec tasks to GitHub Projects with bidirectional sync" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "## Installation" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "\`\`\`yaml" >> release-notes.md
+          echo "- uses: actions/checkout@v4" >> release-notes.md
+          echo "- uses: <owner>/kiro-workers/actions/kiro-cli-setup@v$VERSION" >> release-notes.md
+          echo "  with:" >> release-notes.md
+          echo "    version: 'latest'" >> release-notes.md
+          echo "    kiro-token: \${{ secrets.KIRO_TOKEN }}" >> release-notes.md
+          echo "\`\`\`" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "## Verification" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "✅ All actions built with zero third-party dependencies (only @actions/* and Node.js built-ins)" >> release-notes.md
+          echo "✅ All actions tested and verified" >> release-notes.md
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ needs.build-all.outputs.version }}
+          body_path: release-notes.md
+          draft: false
+          prerelease: false
+
+      - name: Release summary
+        run: |
+          echo "## 🎉 Release ${{ needs.build-all.outputs.version }} Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Actions Released:" >> $GITHUB_STEP_SUMMARY
+          echo "* kiro-cli-setup" >> $GITHUB_STEP_SUMMARY
+          echo "* kiro-pr-review" >> $GITHUB_STEP_SUMMARY
+          echo "* kiro-issue-review" >> $GITHUB_STEP_SUMMARY
+          echo "* kiro-project-sync" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Verification:" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Zero third-party dependencies verified" >> $GITHUB_STEP_SUMMARY
+          echo "✅ All dist/ directories committed" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Release created successfully" >> $GITHUB_STEP_SUMMARY

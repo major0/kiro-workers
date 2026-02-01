@@ -535,3 +535,25 @@ This implementation plan breaks down the kiro-workers project into discrete, inc
 - Integration tests validate end-to-end workflows
 - Self-integration serves as acceptance testing
 - Focus on highest quality results with thorough testing at each step
+
+## Git Commit Requirements
+
+**IMPORTANT**: Each completed task MUST be accompanied by a git commit following these rules:
+
+1. **Commit Scope**: Include all work for the task (code, tests, docs, config) plus the tasks.md update marking the task complete
+2. **Commit Message Format**: Follow Conventional Commits with task reference
+   - Format: `<type>(<scope>): <task-id> <task-title>`
+   - Example: `feat(shared): 2.1 Create download utility`
+   - Example: `test(shared): 2.2 Write property test for download utility`
+3. **Task Updates**: Always include the tasks.md file with the task checkbox marked as complete `[x]`
+4. **Atomic Commits**: Each sub-task gets its own commit - do not combine multiple tasks
+5. **No Unrelated Changes**: Commits should only contain changes related to the specific task
+
+**Commit Type Guidelines**:
+- `feat`: New functionality (implementation tasks)
+- `test`: Test additions or modifications
+- `docs`: Documentation changes
+- `build`: Build system or tooling changes
+- `chore`: Maintenance tasks (editorconfig, pre-commit setup)
+
+_Requirements: 14.1, 14.2, 14.3, 14.4, 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7_

@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "name": "Update Tasks & Push",
+  "description": "When agent execution completes, update task.md with finished work, create a git commit describing changes, and push to GitHub",
+  "version": "1",
+  "when": {
+    "type": "agentStop"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Review the work that was just completed. Update .kiro/specs/kiro-workers/tasks.md to mark completed tasks as done. Then create a descriptive git commit message based on the changes made, commit all changes, and push to GitHub, then use thw `github cli` to create a PR for the pushed topic branch."
+  },
+  "workspaceFolderName": "kiro-workers",
+  "shortName": "update-tasks-and-push"
+}

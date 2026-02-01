@@ -326,3 +326,17 @@ This experimental project aims to determine whether GitHub Actions can effective
 5. THE project SHALL document the rationale for this constraint in the README
 6. WHEN building the actions, THE bundled output SHALL be audited to ensure no third-party dependencies are included
 7. THE actions SHALL NOT use external HTTP APIs beyond GitHub's official APIs and the Kiro CLI download endpoint
+
+### Requirement 16: Task-Based Git Commits
+
+**User Story:** As a project maintainer, I want each task completion to be tracked with a git commit, so that progress is documented and changes are traceable.
+
+#### Acceptance Criteria
+
+1. WHEN a task is completed, THE implementer SHALL create a git commit that includes all work for that task
+2. THE git commit SHALL include updates to the tasks.md file marking the task as completed
+3. THE commit message SHALL follow the Conventional Commits format
+4. THE commit message SHALL reference the task ID and title from tasks.md
+5. WHERE a task has multiple sub-tasks, THE implementer SHALL create a commit for each completed sub-task
+6. THE commit SHALL include all code, tests, documentation, and configuration changes related to the task
+7. THE commit SHALL NOT include unrelated changes from other tasks
