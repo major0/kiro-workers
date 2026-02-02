@@ -1,0 +1,12 @@
+{
+  "name": "Task Initiation and Implementation",
+  "version": "1.0.0",
+  "description": "Triggers on prompt submit to detect task start requests, create branch, and implement task",
+  "when": {
+    "type": "promptSubmit"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Check if the user's prompt is requesting to start a task from `.kiro/specs/*/tasks.md`. Look for phrases like 'execute task', 'start task', 'implement task', 'work on task', followed by a task ID (e.g., '2.1', '3.2.1').\n\nIf YES (this is a task start request):\n\n1. **Identify Task**: Parse task ID and locate task in tasks.md\n2. **Mark In Progress**: Use taskStatus tool to mark task as in_progress\n3. **Update Main**: \n   ```bash\n   git checkout main\n   git pull origin main\n   ```\n4. **Create Branch**: \n   ```bash\n   git checkout -b <type>/<task-id>-<description> origin/main\n   ```\n   - type: feat, fix, docs, test, refactor, etc.\n   - task-id: e.g., 2.1, 3.2.1\n   - description: brief kebab-case description\n5. **Verify Branch**: Ensure branch is up-to-date with origin/main\n6. **Implement Task**: \n   - Read task details from tasks.md\n   - Read requirements.md and design.md for context\n   - Implement ONLY core functionality (no tests, no docs)\n   - Create ONE commit: `<type>(<scope>): <task-id> <task-title>`\n\nReference steering file: task-initiation-agent.md\n#[[file:.kiro/steering/task-initiation-agent.md]]\n\nIf NO (not a task start request):\n   - Process the prompt normally\n   - Do nothing special"
+  }
+}

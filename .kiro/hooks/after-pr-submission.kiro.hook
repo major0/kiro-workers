@@ -1,0 +1,12 @@
+{
+  "name": "Monitor CI/CD and Fix Failures",
+  "version": "1.0.0",
+  "description": "After PR submission, monitor CI/CD and automatically fix failures",
+  "when": {
+    "type": "agentStop"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Check if the agent that just completed was creating/updating a PR (look for 'gh pr create' or 'git push' to PR branch).\n\nIf YES (this was PR submission):\n\nReference steering file: ci-cd-monitoring-agent.md\n#[[file:.kiro/steering/ci-cd-monitoring-agent.md]]\n\nThe steering file contains detailed instructions for:\n\n1. **Get PR Number**: Extract from previous output or use `gh pr list --head <branch>`\n\n2. **Monitor CI/CD**: \n   ```bash\n   gh pr checks <pr-number> --watch\n   ```\n   This will automatically poll and display check status\n\n3. **If All Pass**: Report success and exit\n\n4. **If Failures Detected**:\n   a. **Analyze Logs**: \n      ```bash\n      gh pr checks <pr-number>\n      gh run view <run-id> --log\n      ```\n   \n   b. **Fix Issues**: Based on failure type:\n      - Test failures: Fix tests or implementation\n      - Linting: Run linter and fix\n      - Coverage: Add missing tests\n      - Build: Fix compilation errors\n      - Type errors: Fix TypeScript issues\n   \n   c. **Soft Reset Again**: \n      ```bash\n      git fetch origin main\n      git reset --soft origin/main\n      ```\n   \n   d. **Re-commit Cleanly**: Same 4-commit structure as before\n   \n   e. **Force Push**: \n      ```bash\n      git push --force-with-lease origin <branch-name>\n      ```\n   \n   f. **Monitor Again**: Repeat from step 2\n   \n   g. **Max 3 Attempts**: If still failing after 3 fix attempts, report to user\n\n5. **Report Final Status**: Success or failure with details\n\nIf NO (this wasn't PR submission):\n   - Do nothing"
+  }
+}
