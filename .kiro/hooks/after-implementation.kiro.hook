@@ -1,0 +1,15 @@
+{
+  "name": "Launch Quality Assurance Agents",
+  "version": "1.0.0",
+  "description": "After implementation, launch 10 quality agents in parallel",
+  "when": {
+    "type": "agentStop"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Check if the agent that just completed was implementing a task (look for a commit with 'feat' or 'fix' type in the message).\n\nIf YES (this was task implementation):\n\nLaunch the following sub-agents:\n\n1. **Documentation Agent**\n   Reference: #[[file:.kiro/steering/documentation-agent.md]]\n   Task: Update inline comments, README, API docs\n\n2. **Property Testing Agent**\n   Reference: #[[file:.kiro/steering/property-testing-agent.md]]\n   Task: Create property-based tests (100+ iterations)\n\n3. **Unit Testing Agent**\n   Reference: #[[file:.kiro/steering/unit-testing-agent.md]]\n   Task: Create unit tests for specific cases and edge cases\n\n4. **Coverage Testing Agent**\n   Reference: #[[file:.kiro/steering/coverage-testing-agent.md]]\n   Task: Verify 90%+ coverage across all categories\n\n5. **Linting Agent**\n   Reference: #[[file:.kiro/steering/linting-agent.md]]\n   Task: Run linter with auto-fix\n\n6. **Formatting Agent**\n   Reference: #[[file:.kiro/steering/formatting-agent.md]]\n   Task: Run formatter (Prettier) with auto-fix\n\n7. **Pre-commit Validation Agent**\n   Reference: #[[file:.kiro/steering/pre-commit-agent.md]]\n   Task: Run all pre-commit hooks\n\n8. **Security Audit Agent**\n   Reference: #[[file:.kiro/steering/security-agent.md]]\n   Task: Check for vulnerabilities, secrets, injection risks\n\n9. **Type Checking Agent**\n   Reference: #[[file:.kiro/steering/type-checking-agent.md]]\n   Task: Verify TypeScript compilation\n\n10. **Build Verification Agent**\n    Reference: #[[file:.kiro/steering/build-verification-agent.md]]\n    Task: Verify project builds successfully\n\nEach agent should commit its changes independently with appropriate commit type (docs, test, chore).\n\nIf NO (this wasn't task implementation):\n   - Do nothing"
+  },
+  "enabled": true,
+  "workspaceFolderName": "kiro-workers",
+  "shortName": "after-implementation"
+}
